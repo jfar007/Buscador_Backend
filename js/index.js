@@ -48,5 +48,121 @@ function playVideoOnScroll(){
     }, 10)
 }
 
+function inicializarCiudades(){
+	var form_data = new FormData();
+	form_data.append('initData', "1");
+	$.ajax({
+		url: './src/orquestaData.php',
+		type: 'POST',
+		dataType: 'json', 
+		cache: false,
+		contentType: false,
+		processData: false,
+		data: form_data,
+		success: function(data, ms, settings){
+				var div = document.getElementById('selectCiudad');
+                Object.keys(data.ciudades).forEach(function(key){     
+								
+										var options = document.createElement('option');
+										options.setAttribute('value', data.ciudades[key]);
+										options.text = data.ciudades[key];
+										div.appendChild(options);
+                });			
+				
+				var div2 = document.getElementById('selectTipo');
+				 Object.keys(data.tipo).forEach(function(key){     
+								
+										var options2 = document.createElement('option');
+										options2.setAttribute('value', data.tipo[key]);
+										options2.text = data.tipo[key];
+										div2.appendChild(options2);
+                });
+				// $(document).ready(function(){$('#selectTipo').material_select();});
+				$('#selectCiudad').material_select();
+				$('#selectTipo').material_select();
+		}
+	})
+	
+}
+
 inicializarSlider();
 playVideoOnScroll();
+inicializarCiudades();
+
+$(function(){
+	$('#submitButton').on('click',function (e){
+		e.preventDefault();
+
+		var form_data = getInfoForm();
+		
+		
+	$.ajax({
+		url: './src/orquestaData.php',
+		type: 'POST',
+		dataType: 'json',
+		cache: false,
+		contentType: false,
+		processData: false,
+		data: form_data,		
+		success: function(data, ms, settings){
+				poblarTablero(data);
+		}
+	})
+		
+	});
+	
+	$('#mostrarTodos').on('click',function (e){
+		e.preventDefault();
+
+		var form_data = new FormData();
+		form_data.append('all', "1");
+		
+	$.ajax({
+		url: './src/orquestaData.php',
+		type: 'POST',
+		dataType: 'json',
+		cache: false,
+		contentType: false,
+		processData: false,
+		data: form_data,		
+		success: function(data, ms, settings){
+				poblarTablero(data);
+		}
+	})
+		
+	});
+	
+});
+
+
+
+
+function getInfoForm(){
+	  var form_data = new FormData();
+	  form_data.append('selectCiudad', $("[id='selectCiudad']").val());
+	  form_data.append('selectTipo', $("[id='selectTipo']").val());
+	  form_data.append('rangoPrecio', $("[id='rangoPrecio']").val());  
+	  return form_data;
+}
+
+
+function poblarTablero(dataLoad){
+	$('.itemMostrado').remove();
+	var colContenido = $(".colContenido");
+	var div = document.createElement("div");
+	  Object.keys(dataLoad.data).forEach(function(key){
+        $('.colContenido').append(
+               "<div class='itemMostrado' id="+dataLoad.data[key].Id+">"
+              +  	"<img src='img/home.jpg'></img>" 
+              +     "<div><p><b>Direccion: </b>"+dataLoad.data[key].Direccion+"<br>"
+              +     "<b>Ciudad: </b>"+dataLoad.data[key].Ciudad+"<br>"
+              +     "<b>Telefono: </b>"+dataLoad.data[key].Telefono+"<br>"
+              +     "<b>Codigo_Postal: </b>"+dataLoad.data[key].Codigo_Postal+"<br>"
+              +     "<b>Tipo: </b>"+dataLoad.data[key].Tipo+"<br></p>"
+              +     "<p class='precioTexto'><b>Precio: </b>"+dataLoad.data[key].Precio+"</p></div>"
+              + "</div>"
+
+          );
+	  });
+	  colContenido.append(div)
+}
